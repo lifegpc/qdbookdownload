@@ -1224,7 +1224,7 @@ function sendmess(tabs)
     }
     for(var i=0;i<bookfree_md.length;i++)
     {
-        if(tabs[0].url.search(bookfree_md[i])>-1)
+        if(tabs[0].url==bookfree_md[i])
         {
             displayn('freebookl');
             chrome.tabs.sendMessage(tabs[0].id,{action:"getNowFreeBook"},function(data)
