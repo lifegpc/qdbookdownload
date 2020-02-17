@@ -1,0 +1,6 @@
+#compiler javascript file
+js/
+#icon file
+ico/
+#other javascript library
+ojs/

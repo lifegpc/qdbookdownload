@@ -1,0 +1,5 @@
+td{border-style: dashed none dashed solid;
+border-color: lightskyblue black lightskyblue black;}
+td.a{background-color: lightpink;}
+td.b{background-color: lightgreen;}
+td.l{border-right-style: solid;text-align: center;}

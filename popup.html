@@ -1,0 +1,118 @@
+<html>
+    <head>
+        <title>起点下载器</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">  
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <script src="ojs/clipboard.min.js"></script>
+        <script src="ojs/FileSaver.min.js"></script>
+        <script src="js/main.js"></script>
+    </head>
+    <body>
+        <div id="runinfoa" style="display: none;">
+            目前有<div id="runinfo" style="display: inline-block;"></div>个任务正在运行，点击<div id="runmanage" style="display: inline-block;color: blue;">这里</div>查看。
+        </div>
+        <div id="chapterinfo" style="display: none;">
+            站点：<br/>起点中文网<br/>
+            章节名：<div id="title"></div>
+            字数：<div id="length"></div>
+            上传时间：<div id="updatetime"></div>
+            章节预览：<div id="textpre"></div>
+            章节ID：<div id="chapterid"></div>
+            VIP状态：<div id="vipstatus"></div>
+            <div id="buystatus" style="display: none;">购买状态：<div id="buystat"></div>
+            <div id="buystatd" style="display: none;">单章订阅：<div id="singlebuy"></div>
+            全部订阅：<div id="allbuy"></div></div></div>
+            自动订阅状态：<div id="autobuy"></div>
+            书名：<div id="bookname"></div>
+            书籍ID：<div id="bookid"></div>
+            作者名：<div id="authorname"></div>
+            作者ID：<div id="authorid"></div>
+            <div id="prevchapter" style="display: none;">上一章节ID：<div id="prevchapterid"></div></div>
+            <div id="nextchapter" style="display: none;">下一章节ID：<div id="nextchapterid"></div></div>
+            <textarea id="copytext" style="width: 1px;height: 1px;"></textarea><button class="copytextb" data-clipboard-target="#copytext">点击复制本章小说内容到剪贴板</button>
+            <button id="saveastxt">保存本章为TXT</button><br/>
+            <button id="saveallastxt">保存整本小说为TXT</button><br/>
+        </div>
+        <div id="zhchapterinfo" style="display: none;">
+            站点：<br/>纵横中文网<br/>
+            章节名：<div id="zhtitle"></div>
+            字数：<div id="zhlength"></div>
+            上传时间：<div id="zhupdatetime"></div>
+            章节预览：<div id="zhtextpre"></div>
+            章节ID：<div id="zhchapterid"></div>
+            VIP状态：<div id="zhvipstatus"></div>
+            <div id="zhbuystatus" style="display: none;">购买状态：<div id="zhbuystat"></div>
+            <div id="zhbuystatd" style="display: none;">单章订阅：<div id="zhsinglebuy"></div>
+            账户余额：<div id="zhblance"></div></div></div>
+            书名：<div id="zhbookname"></div>
+            书籍ID：<div id="zhbookid"></div>
+            作者名：<div id="zhauthorname"></div>
+            <div id="zhprevchapter" style="display: none;">上一章节ID：<div id="zhprevchapterid"></div></div>
+            <div id="zhnextchapter" style="display: none;">下一章节ID：<div id="zhnextchapterid"></div></div>
+            <textarea id="zhcopytext" style="width: 1px;height: 1px;"></textarea><button class="copytextb" data-clipboard-target="#zhcopytext">点击复制本章小说内容到剪贴板</button>
+            <button id="zhsaveastxt">保存本章为TXT</button><br/>
+            <button id="zhsaveallastxt">保存整本小说为TXT</button><br/>
+        </div>
+        <div id="bookinfo" style="display: none;">
+            站点：<br/>起点中文网<br/>
+            书名：<div id="bname"></div>
+            书籍ID：<div id="bid"></div>
+            作者名：<div id="aname"></div>
+            作者ID：<div id="aid"></div>
+            作品状态：<div id="bluetag"></div>
+            作品分类：<div id="redtag"></div>
+            作品介绍：<div id="bd"></div>
+            作品详细介绍：<div id="bdd"></div>
+            作者自定义标签：<div id="atag"></div>
+            总卷数：<div id="zjs"></div>
+            总章节数：<div id="zch"></div>
+            总字数：<div id="zzs"></div>
+            购买情况：<div id="buys"></div>
+            分卷情况：<div id="fj"></div>
+            <b>注：当某一VIP卷里出现免费章节时，该免费章节目前会计算到已购买章节，且由于信息不足，暂时无法修复。</b>
+            <button id="bsaveallastxt">保存整本小说为TXT</button><br/>
+        </div>
+        <div id="zhbookinfo" style="display: none;">
+            站点：<br/>纵横中文网<br/>
+            书名：<div id="zhbname"></div>
+            书籍ID：<div id="zhbid"></div>
+            作者名：<div id="zhan"></div> 
+            作品状态：<div id="zhbsd"></div>
+            作品分类：<div id="zhfl"></div>
+            标签：<div id="zhtag"></div>
+            作品介绍：<div id="zhbd"></div>
+            <div id="gzbma"><button id="gzbm">获取目录信息</button><b>注：这将会打开一个目录标签页，完成获取后会自动关闭。</b></div>
+            <div id="zhbim" style="display: none;">
+                总卷数：<div id="zhjs"></div>
+                总章节数：<div id="zhcs"></div>
+                总字数：<div id="zhzs"></div>
+                分卷情况：<div id="zhfj"></div>
+            </div>
+            <div id="zhbmg"><button id="zhbmgeo">获取详细订阅信息</button><b>注：该操作会自动先获取目录信息</b></div>
+            <button id="zhbsaveallastxt">保存整本小说为TXT</button>
+        </div>
+        <div id="zhbookinfom" style="display: none;">
+            站点：<br/>纵横中文网<br/>
+            书名：<div id="zhbn"></div>
+            作者名：<div id="zhman"></div>
+            总卷数：<div id="zhmjs"></div>
+            总章节数：<div id="zhmcs"></div>
+            总字数：<div id="zhmzs"></div>
+            分卷情况：<div id="zhmfj"></div>
+        </div>
+        <div id="zhbookinfoo" style="display: none;">
+            站点：<br/>纵横中文网<br/>
+            书名：<div id="zhbno"></div>
+            作者名：<div id="zhano"></div>
+            VIP总卷数：<div id="zhvjs"></div>
+            VIP总章节数：<div id="zhvcs"></div>
+            VIP总字数：<div id="zhvzs"></div>
+            VIP订阅所需纵横币数：<div id="zhvzp"></div>
+            分卷情况：<div id="zhvfj"></div>
+        </div>
+        <div id="sasetting" style="display: none;">
+            <input id="snbuy" class="c1" type="checkbox">保存未购买章节<br/>
+            <input id="tnbuy" class="c1" type="checkbox">标注未购买章节
+        </div>
+    </body>
+</html>
