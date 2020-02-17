@@ -6,13 +6,20 @@ console.log('background.js');
         for(var i=0;i<l.length;i++)l[i]=l[i]-1+1;
         return l;
     }
-    function comv(v1,v2)//比较版本数组，前面大 1，相等 0，后面大 -1
+    /**比较版本数组
+     * @param {Array<number>} v1 版本数组
+     * @param {Array<number>} v2 版本数组
+     * @returns 前面大 1，相等 0，后面大 -1*/
+    function comv(v1,v2)
     {
         if (v1>v2)return 1;
         else if(v1<v2)return -1;
         else return 0;
     }
-    function iss(obj,name)//判断是否为name
+    /**判断obj是否为name类型
+     * @param {string} name constructor名字
+    */
+    function iss(obj,name)
     {
         return obj.constructor.name==name;
     }
@@ -33,8 +40,10 @@ console.log('background.js');
     chrome.storage.sync.get(function(data)//获取存储的数据
     {
         console.log(data);
-        var nv=getv(mf.version);//当前版本
-        var cv;//存储数据版本
+        /**当前版本*/
+        var nv=getv(mf.version);
+        /**存储数据版本*/
+        var cv;
         if(data.version!=undefined)cv=getv(data.version);
         if(data.version==undefined||comv(nv,cv)==-1)//从未存储过数据或数据损坏或当前版本低于存储数据的版本
         {
@@ -45,7 +54,9 @@ console.log('background.js');
         }
         else if(comv(nv,cv))//当前版本高于存储版本
         {
-            //当前无 留存为以后版本留下空间
+            var tem={};
+            tem.version=mf.version;
+            chrome.storage.sync.set(tem);
         }
         else//校验完整性
         {
@@ -209,7 +220,7 @@ function run(inp,i,j)
         if(!isc)
         {
             isc=1;
-            chrome.windows.create({focused:false},function(window){wid=window.id;isc=0;run(inp,i,j);});//创建窗口
+            chrome.windows.create({state:chrome.windows.WindowState.MINIMIZED},function(window){wid=window.id;isc=0;run(inp,i,j);});//创建窗口
         }
     }
     if(inp.s)return;//直接退出
@@ -305,7 +316,7 @@ function run(inp,i,j)
     if(wid==0&&(!isc))
     {
         isc=1;
-        chrome.windows.create({focused:false},function(window){wid=window.id;isc=0;;run(inp,i,j);});//创建窗口
+        chrome.windows.create({state:chrome.windows.WindowState.MINIMIZED},function(window){wid=window.id;isc=0;;run(inp,i,j);});//创建窗口
     }
 }
 function c()

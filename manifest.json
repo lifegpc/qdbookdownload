@@ -1,7 +1,7 @@
 {
     "manifest_version":2,
     "name":"起点下载器",
-    "version":"1.0.0",
+    "version":"1.0.1",
     "description":"下载起点中文网/纵横中文网上的小说。已在github上开源，项目链接：https://github.com/lifegpc/qdbookdownload",
     "icons":
     {
@@ -53,6 +53,10 @@
     {
         "matches":["http://home.zongheng.com/show/userInfo/*","https://home.zongheng.com/show/userInfo/*","http://forum.zongheng.com/*","https://forum.zongheng.com/*","http://www.zongheng.com/*","https://www.zongheng.com/*","http://huayu.zongheng.com/*","https://huayu.zongheng.com/*","http://book.zongheng.com/store*","https://book.zongheng.com/store*"],
         "js":["js/zhremovead.js"]
+    },
+    {
+        "matches":["https://www.qidian.com/free","http://www.qidian.com/free"],
+        "js":["js/free.js"]
     }],
     "options_page":"options.html"
 }

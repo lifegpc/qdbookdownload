@@ -5,64 +5,83 @@ var bookinfo_md=["http://book.qidian.com/info/*","https://book.qidian.com/info/*
 var zhbookinfo_md=["http://book.zongheng.com/book/*","https://book.zongheng.com/book/*"];
 var zhbookinfom_md=["http://book.zongheng.com/showchapter/*","https://book.zongheng.com/showchapter/*"];
 var zhbookinfoo_md=["http://book.zongheng.com/orderchapter*","https://book.zongheng.com/orderchapter*"];
+var bookfree_md=["https://www.qidian.com/free","http://www.qidian.com/free"];
 var vip_status=["免费","付费"];
 var isBuy=["未购买","已购买"];
 var autoBuy=['关闭',"开启"];
 var vip=['免费','VIP'];
 var chapterinfo;
 var clipboard;
+/**@type {string} 页面类型*/
 var lx;
 var bookinfo;
 var bookinfom;
+/**@type {number} 当前页面*/
 var tabid;
 /**@type {number} 临时用Tableid*/
 var tid;
 /**@type {number} 临时用Tableid*/
 var tid2;
-/**1 起点章节下载整本小说 2 纵横下载 3纵横章节位置下载 4纵横书籍页获取订阅信息*/
+/**1 起点章节下载整本小说 2 纵横下载 3纵横章节位置下载 4纵横书籍页获取订阅信息 5 起点限时免费页下载*/
 var d=0;
 var setting;
 /**@type {number} 当前页面*/
 var ntid;
-function getbookinfo()
+/**@type {Array<object>} 书单*/
+var booklist;
+/**@type {number} 当前窗口ID*/
+var wid;
+/**非书页获取书籍信息
+ * @param {number} bookid 书籍ID
+ * @param {number} i 输出信息位置（用于批量下载
+ * @param {boolean} f 输出时弹出窗口（用于批量下载
+*/
+function getbookinfo(bookid,i=0,f=false)
 {
-    chrome.tabs.create({url:"https://book.qidian.com/info/"+chapterinfo.g.bookInfo.bookId,active:false},function(tabs)
+    chrome.tabs.create({url:"https://book.qidian.com/info/"+bookid,active:false},function(tabs)
     {
-        /**加载完毕后处理*/
-        function b()
+        /**加载完毕后处理
+         * @param {number} tid 标签页ID
+        */
+        function b(tid)
         {
             chrome.tabs.sendMessage(tid,{action:"getBookInfo"},function(data)
             {
                 chrome.tabs.remove(tid);
                 console.log(data);
+                if(d==5)//发送
+                {
+                    bsaveallastxt(data,i,f);
+                    return;
+                }
                 bookinfo=data;
                 if(d==1)bsaveallastxt();
             });
         }
-        tid=tabs.id;
         if(tabs.status=="loading")
         {
-            /**等待标签页加载完毕*/
-            function a()
+            /**等待标签页加载完毕
+             * @param {number} tid 标签页ID
+            */
+            function a(tid)
             {
                 chrome.tabs.get(tid,function(tabs)
                 {
                     if(tabs.status=="loading")
                     {
-                        tid=tabs.id;
-                        setTimeout(a,500);
+                        setTimeout(function(){a(tid)},500);
                     }
                     else
                     {
-                        setTimeout(b,1000);
+                        setTimeout(function(){b(tid)},1000);
                     }
                 })
             }
-            a();
+            a(tabs.id);
         }
         else
         {
-            setTimeout(b,1000);
+            setTimeout(function(){b(tabs.id)},1000);
         }
     });
 }
@@ -77,7 +96,7 @@ function zhsaveastxt()
 function saveallastxt()
 {
     d=1;
-    getbookinfo();
+    getbookinfo(chapterinfo.g.bookInfo.bookId);
 }
 /**获取save的设置*/
 function getsaset()
@@ -90,13 +109,27 @@ function getsaset()
     }
     return tem;
 }
-function bsaveallastxt()
+/**起点保存一本书（书页）
+ * @param bf 书籍信息
+ * @param {number} i 输出信息位置（用于批量下载
+ * @param {boolean} f 输出时弹出窗口（用于批量下载
+*/
+function bsaveallastxt(bf=bookinfo,i=0,f=false)
 {
-    chrome.runtime.sendMessage({action:"savewholebook",info:bookinfo,set:getsaset()},function(data)
+    chrome.runtime.sendMessage({action:"savewholebook",info:bf,set:getsaset()},function(data)
     {
         console.log(data);
-        if(data)alert('已加入任务列表。（注意请不要关闭插件打开的浏览器窗口，插件的弹出式窗口可以关闭）');
-        else alert('任务列表已有重复任务，添加失败。如需添加，请先停止已有重复任务。');
+        var s='任务列表已有重复任务，添加失败。如需添加，请先停止已有重复任务。';
+        if(data)s='已加入任务列表。（注意请不要关闭插件打开的浏览器窗口）';
+        if(d==5)
+        {
+            document.getElementById('o'+i).innerText=s;
+            if(f)alert('您选择的小说已尝试加入列表，详细情况请查看各本书下面的信息。');
+        }
+        else
+        {
+            alert(s);
+        }
     });
 }
 function zhsaveallastxt()
@@ -416,7 +449,7 @@ function printbookinfo(data)
     var list=getbuystat(data.ml);
     document.getElementById('buys').innerText=getabuy(list);
     document.getElementById('fj').innerText=getfjinfo(data.ml,list);
-    document.getElementById('bsaveallastxt').addEventListener('click',bsaveallastxt);
+    document.getElementById('bsaveallastxt').addEventListener('click',function(){bsaveallastxt()});
 }
 function getzhbooktag(tag,str)
 {
@@ -907,8 +940,204 @@ function sasetautos(i)
     tem[e.id]=e.checked;
     chrome.storage.sync.set(tem);
 }
+/**处理起点限时免费界面
+ * @param data 获取到的信息
+*/
+function freebookc(data)
+{
+    /**新建一个Div元素
+     * @param {string} s innerText
+     * @returns {HTMLDivElement}
+    */
+    function cdiv(s="")
+    {
+        var div=document.createElement('div');
+        if(s=="")return div;
+        else
+        {
+            div.innerText=s;
+            return div;
+        }
+    }
+    /**@type {HTMLInputElement} 全选按钮*/
+    var fba=document.getElementById('fba');
+    fba.disabled=null;
+    /**根据按钮选择情况更新
+     * @param {number} qx 是否全选 1 全选 2 全不选 0 不变
+    */
+    function getfb(qx=0)
+    {
+        /**@type {HTMLCollectionOf<HTMLInputElement>} 所有选择按钮*/
+        var ci=document.getElementsByClassName('fb');
+        var zp=0;
+        var zc=0;
+        for(var i=0;i<ci.length;i++)
+        {
+            if(qx==1)ci[i].checked=true;else if(qx==2)ci[i].checked=null;
+            if(ci[i].checked)
+            {
+                zc++;
+                zp+=booklist[i].p;
+            }
+        }
+        document.getElementById('fd').innerText="您已选择了"+zc+"本书，共¥"+zp;
+        if(zc==i)
+        {
+            fba.indeterminate=null;
+            fba.checked=true;
+        }
+        else if(zc==0)
+        {
+            fba.checked=null;
+            fba.indeterminate=null;
+        }
+        else
+        {
+            fba.checked=null;
+            fba.indeterminate=true;
+        }
+    }
+    fba.addEventListener('click',function()
+    {
+        if(!fba.checked)
+        {
+            getfb(2);
+        }
+        else
+        {
+            getfb(1);
+        }
+    });
+    var div=document.getElementById('freebookl');
+    var style=document.createElement('style');
+    style.innerText=".fc{display:inline-block}";
+    div.append(style);
+    /**获取每一本书的界面
+     * @param data 一本书的信息
+     * @param {number} i 序号（从0开始）
+     * @returns {HTMLDivElement} 一本书界面信息
+    */
+    function getdiv(data,i)
+    {
+        var div=cdiv();
+        var input=document.createElement('input');
+        input.type="checkbox";
+        input.className="fb";
+        input.checked=true;
+        input.addEventListener('click',function(){getfb()});
+        div.append(input);
+        /**显示
+         * @param data 书籍信息
+         * @param {MouseEvent} e 鼠标事件
+        */
+        function printd(data,e)
+        {
+            /**从e获取名为id的属性值
+             * @param {string} id 属性名
+            */
+            var ee=e.srcElement;
+            function gets(id)
+            {
+                return ee.getAttribute(id);
+            }
+            /**设置e的属性名为id的属性值
+             * @param {string} id 属性名
+             * @param {string} va 属性值
+            */
+            function sets(id,va)
+            {
+                ee.setAttribute(id,va)
+            }
+            var i=gets('i');
+            var d=gets('d');
+            var div=document.getElementById('i'+i);
+            if(d==0)
+            {
+                div.append(cdiv("作品简介："));
+                div.append(cdiv(data.in));
+                div.append(cdiv('作者名：'));
+                div.append(cdiv(data.an));
+                div.append(cdiv('作品分类：'));
+                div.append(cdiv(data.fl));
+                div.append(cdiv('作品状态：'));
+                div.append(cdiv(data.s));
+                div.style.display=null;
+                sets('d',1);
+            }
+            else if(d==1)
+            {
+                div.style.display="none";
+                sets('d',2);
+            }
+            else
+            {
+                div.style.display=null;
+                sets('d',1);
+            }
+        }
+        var div2=cdiv(data.bn+"（¥"+data.p+"）");
+        div2.setAttribute('i',i);
+        div2.setAttribute('d',0);
+        div2.className="fc";
+        (function(data){div2.addEventListener('click',function(e){printd(data,e)})})(data);
+        div.append(div2);
+        var div3=cdiv();
+        div3.id="i"+i;
+        div3.style.display="none";
+        div.append(div3);
+        var div4=cdiv();
+        div4.id="o"+i;//用于显示返回数据
+        div.append(div4);
+        return div;
+    }
+    var ap=0;
+    for(var i=0;i<data.length;i++)
+    {
+        div.append(getdiv(data[i],i));
+        ap+=data[i].p;
+    }
+    var div4=cdiv("您已选择了"+i+"本书，共¥"+ap);
+    div4.id="fd";
+    div.append(div4);
+    var bu=document.createElement('button');
+    bu.innerText="保存以上选中书为TXT";
+    bu.addEventListener('click',function()
+    {
+        /**@type {HTMLCollectionOf<HTMLInputElement>} 所有选择按钮*/
+        var ci=document.getElementsByClassName('fb');
+        var c=0;
+        d=5;
+        var l=0;
+        for(var i=0;i<ci.length;i++)
+        {
+            if(ci[i].checked)l=i;
+        }
+        for(var i=0;i<ci.length;i++)
+        {
+            if(ci[i].checked)
+            {
+                (function(bookid,i,c,f){setTimeout(function(){getbookinfo(bookid,i,f)},4000*c)})(booklist[i].h.split('info/')[1]-1+1,i,c,i==l);
+                c++;
+            }
+        }
+        if(c==0)
+        {
+            alert('您没有选择需要下载的小说！');
+        }
+    });
+    div.append(bu);
+}
 function sendmess(tabs)
 {
+    /**显示指定元素显示并设置宽度
+     * @param {string} id 元素ID
+     * @param tab 当前标签页数组
+    */
+    function displayn(id,tab=tabs)
+    {
+        document.getElementById(id).style.display=null;
+        document.getElementById(id).style.width=tab[0].width/2;
+    }
     tabid=tabs[0].id;
     chrome.runtime.sendMessage({action:"getruninfo"},function(data)
     {
@@ -927,8 +1156,7 @@ function sendmess(tabs)
     {
         if(tabs[0].url.search(chapter_md[i])>-1)
         {
-            document.getElementById('chapterinfo').style.display=null;
-            document.getElementById('chapterinfo').style.width=tabs[0].width/2;
+            displayn('chapterinfo');
             chrome.tabs.sendMessage(tabs[0].id,{action:'getCheapter'},function(data){console.log(data);printinfo(data);chapterinfo=data;});
             lx="qdc";
             osasetting(tabs[0].width);
@@ -939,8 +1167,7 @@ function sendmess(tabs)
     {
         if(tabs[0].url.search(zhchapter_md[i])>-1)
         {
-            document.getElementById('zhchapterinfo').style.display=null;
-            document.getElementById('zhchapterinfo').style.width=tabs[0].width/2;
+            displayn('zhchapterinfo');
             chrome.tabs.sendMessage(tabs[0].id,{action:'getzhChapter'},function(data){console.log(data);printzhinfo(data);chapterinfo=data;});
             lx="zhc";
             osasetting(tabs[0].width);
@@ -951,8 +1178,7 @@ function sendmess(tabs)
     {
         if(tabs[0].url.search(bookinfo_md[i])>-1)
         {
-            document.getElementById('bookinfo').style.display=null;
-            document.getElementById('bookinfo').style.width=tabs[0].width/2;
+            displayn('bookinfo');
             chrome.tabs.sendMessage(tabs[0].id,{action:'getBookInfo'},function(data){console.log(data);printbookinfo(data);bookinfo=data;});
             lx="qdb";
             osasetting(tabs[0].width);
@@ -963,8 +1189,7 @@ function sendmess(tabs)
     {
         if(tabs[0].url.search(zhbookinfo_md[i])>-1)
         {
-            document.getElementById('zhbookinfo').style.display=null;
-            document.getElementById('zhbookinfo').style.width=tabs[0].width/2;
+            displayn('zhbookinfo');
             chrome.tabs.sendMessage(tabs[0].id,{action:'getzhBookInfo'},function(data){console.log(data);printzhbookinfo(data);bookinfo=data;});
             lx="zhb";
             osasetting(tabs[0].width);
@@ -975,8 +1200,7 @@ function sendmess(tabs)
     {
         if(tabs[0].url.search(zhbookinfom_md[i])>-1)
         {
-            document.getElementById('zhbookinfom').style.display=null;
-            document.getElementById('zhbookinfom').style.width=tabs[0].width/2;
+            displayn('zhbookinfom');
             chrome.tabs.sendMessage(tabs[0].id,{action:'getzhBookInfom'},function(data){console.log(data);printzhbookinfom(data);bookinfom=data;});
             lx="zhbm";
             break;
@@ -986,8 +1210,7 @@ function sendmess(tabs)
     {
         if(tabs[0].url.search(zhbookinfoo_md[i])>-1)
         {
-            document.getElementById('zhbookinfoo').style.display=null;
-            document.getElementById('zhbookinfoo').style.width=tabs[0].width/2;
+            displayn('zhbookinfoo');
             function send()
             {
                 chrome.tabs.sendMessage(tabs[0].id,{action:"getzhBookInfoo"},function(data){console.log(data);if(data.s){
@@ -999,6 +1222,22 @@ function sendmess(tabs)
             break;
         }
     }
+    for(var i=0;i<bookfree_md.length;i++)
+    {
+        if(tabs[0].url.search(bookfree_md[i])>-1)
+        {
+            displayn('freebookl');
+            chrome.tabs.sendMessage(tabs[0].id,{action:"getNowFreeBook"},function(data)
+            {
+                console.log(data);
+                freebookc(data.l);
+                booklist=data.l;
+            });
+            osasetting(tabs[0].width);
+            lx="qdbf";
+            break;
+        }
+    }
 }
 chrome.storage.sync.get(function(data)//获取设置信息
 {
@@ -1006,6 +1245,7 @@ chrome.storage.sync.get(function(data)//获取设置信息
     setting=data;
     chrome.windows.getCurrent(function(window)//获得现在的窗口
     {
+        wid=window.id;
         chrome.tabs.query({active:true,windowId:window.id},function(data){console.log(data);sendmess(data);ntid=data[0].id});//获取标签页
     });
 });
