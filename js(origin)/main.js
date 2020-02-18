@@ -51,7 +51,17 @@ function getbookinfo(bookid,i=0,f=false)
                 console.log(data);
                 if(d==5)//发送
                 {
+                    if(data.s)//出现404
+                    {
+                        document.getElementById('o'+i).innerText="出现错误：很有可能是404。";
+                        return;
+                    }
                     bsaveallastxt(data,i,f);
+                    return;
+                }
+                if(data.s)
+                {
+                    alert("出现错误：很有可能是404。");
                     return;
                 }
                 bookinfo=data;
@@ -1157,7 +1167,13 @@ function sendmess(tabs)
         if(tabs[0].url.search(chapter_md[i])>-1)
         {
             displayn('chapterinfo');
-            chrome.tabs.sendMessage(tabs[0].id,{action:'getCheapter'},function(data){console.log(data);printinfo(data);chapterinfo=data;});
+            chrome.tabs.sendMessage(tabs[0].id,{action:'getCheapter'},function(data){console.log(data);
+                if(data.s)
+                {
+                    document.getElementById('chapterinfo').innerHTML="出现错误：很有可能是404。";
+                    return;
+                }
+                printinfo(data);chapterinfo=data;});
             lx="qdc";
             osasetting(tabs[0].width);
             break;
@@ -1179,7 +1195,13 @@ function sendmess(tabs)
         if(tabs[0].url.search(bookinfo_md[i])>-1)
         {
             displayn('bookinfo');
-            chrome.tabs.sendMessage(tabs[0].id,{action:'getBookInfo'},function(data){console.log(data);printbookinfo(data);bookinfo=data;});
+            chrome.tabs.sendMessage(tabs[0].id,{action:'getBookInfo'},function(data){console.log(data);
+                if(data.s)
+                {
+                    document.getElementById('bookinfo').innerHTML="出现错误：很有可能是404。";
+                    return;
+                }
+                printbookinfo(data);bookinfo=data;});
             lx="qdb";
             osasetting(tabs[0].width);
             break;
