@@ -6,6 +6,7 @@ var zhbookinfo_md=["http://book.zongheng.com/book/*","https://book.zongheng.com/
 var zhbookinfom_md=["http://book.zongheng.com/showchapter/*","https://book.zongheng.com/showchapter/*"];
 var zhbookinfoo_md=["http://book.zongheng.com/orderchapter*","https://book.zongheng.com/orderchapter*"];
 var bookfree_md=["https://www.qidian.com/free","http://www.qidian.com/free"];
+var book_md=["https://www.qidian.com/all*","http://www.qidian.com/all*","https://www.qidian.com/finish*","http://www.qidian.com/finish*","https://www.qidian.com/free/all*","http://www.qidian.com/free/all*"];
 var vip_status=["免费","付费"];
 var isBuy=["未购买","已购买"];
 var autoBuy=['关闭',"开启"];
@@ -1042,10 +1043,10 @@ function freebookc(data)
         */
         function printd(data,e)
         {
+            var ee=e.srcElement;
             /**从e获取名为id的属性值
              * @param {string} id 属性名
             */
-            var ee=e.srcElement;
             function gets(id)
             {
                 return ee.getAttribute(id);
@@ -1109,6 +1110,11 @@ function freebookc(data)
     var div4=cdiv("您已选择了"+i+"本书，共¥"+ap);
     div4.id="fd";
     div.append(div4);
+    div.append(getbu());
+}
+/**返回保存以上书为TXT按钮（免费限时页，书库页 */
+function getbu()
+{
     var bu=document.createElement('button');
     bu.innerText="保存以上选中书为TXT";
     bu.addEventListener('click',function()
@@ -1135,7 +1141,207 @@ function freebookc(data)
             alert('您没有选择需要下载的小说！');
         }
     });
-    div.append(bu);
+    return bu;
+}
+/**处理起点全部作品等界面
+ * @param data 获取到的信息
+*/
+function abookc(data)
+{
+    /**新建一个Div元素
+     * @param {string} s innerText
+     * @returns {HTMLDivElement}
+    */
+    function cdiv(s="")
+    {
+        var div=document.createElement('div');
+        if(s=="")return div;
+        else
+        {
+            div.innerText=s;
+            return div;
+        }
+    }
+    /**新建一个内部带有超链接的Div元素
+     * @param {string} s innerText
+     * @param {string} h href
+     * @returns {HTMLDivElement}
+    */
+    function cdiva(s,h)
+    {
+        var div=cdiv();
+        var a=document.createElement('a');
+        a.innerText=s;
+        a.href=h;
+        a.addEventListener('click',function(e)
+        {
+            e.preventDefault();
+            chrome.tabs.create({url:e.srcElement.href});
+        });
+        div.append(a);
+        return div;
+    }
+    /**@type {HTMLInputElement} 全选按钮*/
+    var fbb=document.getElementById('fbb');
+    fbb.disabled=null;
+    /**根据按钮选择情况更新
+     * @param {number} qx 是否全选 1 全选 2 全不选 0 不变
+    */
+    function getfb(qx=0)
+    {
+        /**@type {HTMLCollectionOf<HTMLInputElement>} 所有选择按钮*/
+        var ci=document.getElementsByClassName('fb');
+        var zc=0;
+        for(var i=0;i<ci.length;i++)
+        {
+            if(qx==1)ci[i].checked=true;else if(qx==2)ci[i].checked=null;
+            if(ci[i].checked)
+            {
+                zc++;
+            }
+        }
+        document.getElementById('fd').innerText="您已选择了"+zc+"本书";
+        if(zc==i)
+        {
+            fbb.indeterminate=null;
+            fbb.checked=true;
+        }
+        else if(zc==0)
+        {
+            fbb.checked=null;
+            fbb.indeterminate=null;
+        }
+        else
+        {
+            fbb.checked=null;
+            fbb.indeterminate=true;
+        }
+    }
+    fbb.addEventListener('click',function()
+    {
+        if(!fbb.checked)
+        {
+            getfb(2);
+        }
+        else
+        {
+            getfb(1);
+        }
+    });
+    var div=document.getElementById('booklist');
+    var style=document.createElement('style');
+    style.innerText=".fc{display:inline-block}";
+    div.append(style);
+    /**获取书籍所在的界面
+     * @param data 书籍信息
+     * @param {number} i 序号(从0开始)
+     * @param {number} c 书籍显示模式（与需要显示的内容相关
+     * @returns {HTMLDivElement}
+    */
+    function getdiv(data,i,c)
+    {
+        var div=cdiv();
+        var input=document.createElement('input');
+        input.type="checkbox";
+        input.className="fb";
+        input.checked=true;
+        input.addEventListener('click',function(){getfb()});
+        div.append(input);
+        /**显示
+         * @param data 书籍信息
+         * @param {MouseEvent} e 鼠标事件
+         * @param {number} c 书籍显示模式
+        */
+        function printd(data,e,c)
+        {
+            var ee=e.srcElement;
+            /**从e获取名为id的属性值
+             * @param {string} id 属性名
+            */
+            function gets(id)
+            {
+                return ee.getAttribute(id);
+            }
+            /**设置e的属性名为id的属性值
+             * @param {string} id 属性名
+             * @param {string} va 属性值
+            */
+            function sets(id,va)
+            {
+                ee.setAttribute(id,va)
+            }
+            var i=gets('i');
+            var d=gets('d');
+            var div=document.getElementById('i'+i);
+            if(d==0)
+            {
+                div.append(cdiva('作品详情页',data.h));
+                if(c)
+                {
+                    div.append(cdiv('作品简介：'));
+                    div.append(cdiv(data.in));
+                }
+                div.append(cdiv('作者名：'));
+                div.append(cdiv(data.an));
+                /**获取分类字符串
+                 * @param {Array<string>} fl 分类
+                 * @returns {string}
+                */
+                function getflstr(fl)
+                {
+                    var s=fl[0]+"·"+fl[1];
+                    if(fl.length==3)s+=("、"+fl[2]);
+                    return s;
+                }
+                div.append(cdiv('分类：'))
+                div.append(cdiv(getflstr(data.fl)));
+                if(c)
+                {
+                    div.append(cdiv('作品状态：'));
+                    div.append(cdiv(data.s));
+                }
+                else
+                {
+                    div.append(cdiv('最新章节：'));
+                    var div2=cdiva(data.cn,data.cp);
+                    div2.innerHTML+=("（"+data.ct+"）");
+                    div.append(div2);
+                }
+                sets('d',1);
+            }
+            else if(d==1)
+            {
+                div.style.display="none";
+                sets('d',2);
+            }
+            else if(d==2)
+            {
+                div.style.display=null;
+                sets('d',1);
+            }
+        }
+        var div2=cdiv(data.bn);
+        div2.setAttribute('i',i);
+        div2.setAttribute('d',0);
+        div2.className="fc";
+        (function(data){div2.addEventListener('click',function(e){printd(data,e,c)})})(data);
+        div.append(div2);
+        var div3=cdiv();
+        div3.id="i"+i;
+        div.append(div3);
+        var div4=cdiv();
+        div4.id="o"+i;
+        div.append(div4);
+        return div;
+    }
+    for(var i=0;i<data.l.length;i++)
+    {
+        div.append(getdiv(data.l[i],i,data.c));
+    }
+    var div4=cdiv("您已选择了"+i+"本书");
+    div4.id="fd";
+    div.append(div4);
+    div.append(getbu());
 }
 function sendmess(tabs)
 {
@@ -1257,6 +1463,22 @@ function sendmess(tabs)
             });
             osasetting(tabs[0].width);
             lx="qdbf";
+            break;
+        }
+    }
+    for(var i=0;i<book_md.length;i++)
+    {
+        if(tabs[0].url.search(book_md[i])>-1)
+        {
+            displayn('booklist');
+            chrome.tabs.sendMessage(tabs[0].id,{action:"getBookList"},function(data)
+            {
+                console.log(data);
+                abookc(data);
+                booklist=data.l;
+            });
+            osasetting(tabs[0].width);
+            lx="qdbl";
             break;
         }
     }
