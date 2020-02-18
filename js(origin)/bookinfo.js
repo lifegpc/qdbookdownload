@@ -4,6 +4,16 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
     if(message.action=="getBookInfo")
     {
         var info={};
+        if(document.getElementsByClassName('error-text fl').length)
+        {
+            info.s=1;//404或其他错误
+            sendResponse(info);
+            return;
+        }
+        else
+        {
+            info.s=0;//无错误
+        }
         var ci=document.getElementsByTagName('script')
         for(var i=0;i<ci.length;i++)
         {

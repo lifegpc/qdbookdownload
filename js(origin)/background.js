@@ -233,7 +233,7 @@ function run(inp,i,j)
         if(!inp.se.snbuy&&((inp.z==0&&inp.ml[i].l[j].buy==0&&inp.ml[i].vip==1)||(inp.z==1&&inp.ml[i].l[j].buy!=undefined&&inp.ml[i].l[j].buy==0)))//不保存未购买章节
         {
             inp.c--;
-            setTimeout(function(){run(inp,i,j+1)},100);
+            setTimeout(function(){run(inp,i,j+1)},0);
             return;
         }
         try{
@@ -246,6 +246,11 @@ function run(inp,i,j)
                         if(inp.z==1)acm="getzhChapter";
                     chrome.tabs.sendMessage(tid,{action:acm},function(data)
                     {
+                        if(inp.z==0&&data.s)//起点章节404检测
+                        {
+                            inp.s=1;
+                            return;
+                        }
                         function gets(data,i,inp)
                         {
                             var s;
@@ -259,7 +264,7 @@ function run(inp,i,j)
                         }
                         inp.o[inp.n+1]=gets(data,i,inp);
                         inp.n++;
-                        setTimeout(function(){run(inp,i,j+1)},100);
+                        setTimeout(function(){run(inp,i,j+1)},0);
                         chrome.tabs.remove(tid);
                     });}catch(f){errorcl(f)}
                 }

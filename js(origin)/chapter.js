@@ -4,6 +4,12 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)//响
 if(message.action=='getCheapter')//获取章节信息
 {
     var info={};
+    if(document.getElementsByClassName('error-text fl').length)
+    {
+        info.s=1;//404或其他错误
+        sendResponse(info);
+        return;
+    }
     var ci=document.getElementsByTagName('script');
     for (var i=0;i<ci.length;i++)
     {
