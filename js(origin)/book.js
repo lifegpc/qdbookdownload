@@ -25,11 +25,19 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
                 cq=cq.children[1];
                 /**@type {string} 作者名*/
                 tem.an=cq.children[1].innerText;
-                /**@type {Array<string>} 分类*/
-                tem.fl=[cq.children[3].innerText,cq.children[5].innerText];
-                if(cq.childElementCount==10)tem.fl[2]=cq.children[9].innerText;
-                /**@type {string} 小说状态*/
-                tem.s=cq.children[7].innerText;
+                if(document.URL.split('//')[1].split('/')[1]!='mm')
+                {
+                    /**@type {Array<string>} 分类*/
+                    tem.fl=[cq.children[3].innerText,cq.children[5].innerText];
+                    if(cq.childElementCount==10)tem.fl[2]=cq.children[9].innerText;
+                    /**@type {string} 小说状态*/
+                    tem.s=cq.children[7].innerText;
+                }
+                else
+                {
+                    tem.fl=cq.children[3].innerText;
+                    tem.s=cq.children[5].innerText;
+                }
                 list[i]=tem;
             }
             info.l=list;
@@ -52,8 +60,9 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
                 tem2.h=cb.children[1].children[0].href;
                 /**@type {string} 作者名*/
                 tem2.an=cb.children[4].innerText;
-                /**@type {Array<string>} 分类*/
-                tem2.fl=[cb.children[0].children[0].innerText.substring(1),cb.children[0].children[2].innerText.split("」")[0]];
+                /**分类*/
+                if(document.URL.split('//')[1].split('/')[1]!='mm')tem2.fl=[cb.children[0].children[0].innerText.substring(1),cb.children[0].children[2].innerText.split("」")[0]];
+                else tem2.fl=cb.children[0].innerText.substring(1).split("」")[0];
                 /**@type {string} 最新章节名*/
                 tem2.cn=cb.children[2].innerText;
                 /**@type {string} 最新章节链接*/
