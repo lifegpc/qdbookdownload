@@ -1346,6 +1346,41 @@ function abookc(data)
 }
 function sendmess(tabs)
 {
+    (function(){
+    /**@param {MouseEvent} e*/
+    function adde(e)
+    {
+        e.preventDefault();
+        chrome.tabs.create({url:e.srcElement.href});
+    }
+    var div=document.createElement('div');
+    div.style.width=tabs[0].width/2;
+    var style=document.createElement('style');
+    style.innerText=".vl{display:inline-block;";
+    div.append(style);
+    var div2=document.createElement('div');
+    var a=document.createElement('a');
+    a.innerText="源代码";
+    a.href="https://github.com/lifegpc/qdbookdownload"
+    a.addEventListener('click',adde);
+    var div3=document.createElement('div');
+    div3.className="vl";
+    div3.innerText="已开源至Github";
+    div2.append(a);
+    div2.append(div3);
+    div.append(div2);
+    div2=document.createElement('div');
+    div3=document.createElement('div');
+    div3.innerText="采用";
+    div3.className="vl";
+    div2.append(div3);
+    a=document.createElement('a');
+    a.innerText="GNU公共许可证";
+    a.href="LICENSE";
+    a.addEventListener('click',adde);
+    div2.append(a);
+    div.append(div2);
+    document.body.append(div);})();
     /**显示指定元素显示并设置宽度
      * @param {string} id 元素ID
      * @param tab 当前标签页数组
