@@ -60,7 +60,7 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
                 tem2.h=cb.children[1].children[0].href;
                 /**@type {string} 作者名*/
                 tem2.an=cb.children[4].innerText;
-                /**@type {Array<string>} 分类*/
+                /**分类*/
                 if(document.URL.split('//')[1].split('/')[1]!='mm')tem2.fl=[cb.children[0].children[0].innerText.substring(1),cb.children[0].children[2].innerText.split("」")[0]];
                 else tem2.fl=cb.children[0].innerText.substring(1).split("」")[0];
                 /**@type {string} 最新章节名*/
