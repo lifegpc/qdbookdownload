@@ -5,8 +5,8 @@ var bookinfo_md=["http://book.qidian.com/info/*","https://book.qidian.com/info/*
 var zhbookinfo_md=["http://book.zongheng.com/book/*","https://book.zongheng.com/book/*"];
 var zhbookinfom_md=["http://book.zongheng.com/showchapter/*","https://book.zongheng.com/showchapter/*"];
 var zhbookinfoo_md=["http://book.zongheng.com/orderchapter*","https://book.zongheng.com/orderchapter*"];
-var bookfree_md=["https://www.qidian.com/free","http://www.qidian.com/free"];
-var book_md=["https://www.qidian.com/all*","http://www.qidian.com/all*","https://www.qidian.com/finish*","http://www.qidian.com/finish*","https://www.qidian.com/free/all*","http://www.qidian.com/free/all*"];
+var bookfree_md=["https://www.qidian.com/free","http://www.qidian.com/free","https://www.qidian.com/mm/free","http://www.qidian.com/mm/free"];
+var book_md=["https://www.qidian.com/all*","http://www.qidian.com/all*","https://www.qidian.com/finish*","http://www.qidian.com/finish*","https://www.qidian.com/free/all*","http://www.qidian.com/free/all*","https://www.qidian.com/mm/all*","http://www.qidian.com/mm/all*","https://www.qidian.com/mm/finish*","http://www.qidian.com/mm/finish*","https://www.qidian.com/mm/free/all*","http://www.qidian.com/mm/free/all*"];
 var vip_status=["免费","付费"];
 var isBuy=["未购买","已购买"];
 var autoBuy=['关闭',"开启"];
@@ -1294,7 +1294,8 @@ function abookc(data)
                     return s;
                 }
                 div.append(cdiv('分类：'))
-                div.append(cdiv(getflstr(data.fl)));
+                if(data.fl.constructor.name=="String")div.append(cdiv(data.fl))
+                else div.append(cdiv(getflstr(data.fl)));
                 if(c)
                 {
                     div.append(cdiv('作品状态：'));
