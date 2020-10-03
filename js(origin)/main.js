@@ -441,6 +441,19 @@ function getfjinfo(ml,list)
     }
     return s;
 }
+function caltw(ml)
+{
+    for(var i=0;i<ml.length;i++)
+    {
+        var tem = ml[i];
+        var tw = 0;
+        for(var j=0;j<tem.l.length;j++)
+        {
+            tw += tem.l[j].w;
+        }
+        tem.tw = tw;
+    }
+}
 function printbookinfo(data)
 {
     document.getElementById('bname').innerText=data.bn;
@@ -454,6 +467,7 @@ function printbookinfo(data)
     for(var i=1;i<data.ind.length;i++)c+=("\n"+data.ind[i]);
     document.getElementById('bdd').innerText=c;
     document.getElementById('atag').innerText=getatagstr(data.atag);
+    caltw(data.ml);
     document.getElementById('zjs').innerText=getzjsd(data.ml);
     document.getElementById('zch').innerText=getzch(data.ml);
     document.getElementById('zzs').innerText=getzss(data.ml);
