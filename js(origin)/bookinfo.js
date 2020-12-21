@@ -97,12 +97,11 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
                 }
                 else
                 {
-                    var temp=ci.children[i].children[1].innerText.split('\n');
-                    temp = temp[4].split(' ')
-                    temp = [temp[temp.length - 2], temp[temp.length - 1]]
-                    mlt.t=temp[0].split('·')[0];//卷名
-                    mlt.tc=temp[0].split('共')[1].split('章')[0]-1+1;//总章数
-                    if(temp[1].indexOf('免费')>-1)mlt.vip=0;else mlt.vip=1;//是否为VIP卷
+                    /**@type {String}*/
+                    var temp = ci.children[i].children[1].innerHTML;
+                    mlt.t = temp.match(/([^ ]+)<i>/)[1];  // 卷名
+                    mlt.tc = temp.match(/共([0-9]+)章/)[1] - 1 + 1;  //总章数
+                    mlt.vip = ci.children[i].children[1].children[1].className == "vip" ? 1 : 0;  //是否为VIP卷
                     // mlt.tw=temp[1].split('共')[1].split('字')[0]-1+1;//总字数
                     var t=ci.children[i].children[2];
                     mlt.l=getchatperlist(t,mlt.vip);//章节列表
