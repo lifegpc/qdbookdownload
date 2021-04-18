@@ -223,7 +223,7 @@ function run(inp, i, j) {
     if (j >= inp.ml[i].l.length) {
         j = 0; i++;
     }
-    if (j == 0) {
+    if (j == 0 && i < inp.ml.length) {
         /**@type {EPUB}*/
         let e = inp.epub;
         inp.child = e.appendXHtmlNode(i, j, inp.ml[i]);

@@ -498,7 +498,8 @@ class EPUBFile {
 class EPUBTextFile extends EPUBFile {
     constructor(href, d, meta) {
         super(href, "temp");
-        this.d = d;
+        this.d = {};
+        Object.assign(this.d, d);
         let s = this.toXML(meta);
         this.blob = new Blob([s], { "type": "application/xhtml+xml; charset=UTF-8" });
     }

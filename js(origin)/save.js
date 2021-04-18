@@ -12,9 +12,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         link.innerHTML = "点击这里也可以保存";
         document.body.appendChild(link);
     } else if (message["action"] == "saveepub" && b == undefined) {
-        let list = Object.getOwnPropertyNames(message.b);
-        var b = new Uint8Array(list.length);
-        list.forEach((v) => {b[v] = message.b[v]})
+        var b = new Uint8Array(Object.values(message.b));
         b = new Blob([b], { type: 'application/zip' });
         saveAs(b, message["name"] + ".epub")
         sendResponse(1);
