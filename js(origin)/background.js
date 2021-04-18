@@ -81,7 +81,7 @@ console.log('background.js');
 })();
 var runlist = [];//正在run的任务列表
 var zd = ['起点中文网', '纵横中文网'];
-var lx = ['txt'];
+var lx = ['txt', 'epub'];
 var st = ['正在运行', '正在停止'];
 var wid = 0;
 var isc = 0;
@@ -143,6 +143,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         var tem = {};//存储基础任务信息
         tem.z = 0;//站点，0起点，1纵横
         tem.l = 0;//0保存为TXT
+        if (message.hasOwnProperty("epub")) {
+            if (message["epub"] == true) {
+                tem.l = 1;
+            }
+        }
         tem.bid = message.info.g_data.pageJson.bookId;//书籍ID
         tem.bn = message.info.bn;//书名
         tem.ml = message.info.ml;//目录
@@ -152,7 +157,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         tem.c = c;//总章数
         tem.n = 0;//已完成章数
         tem.s = 0;//是否停止
-        tem.o = [getbookinfo(message.info)];
+        if (tem.l == 0) tem.o = [getbookinfo(message.info)];
+        else {
+            tem.epub = new EPUB(message.info);
+            if (message.info.hasOwnProperty("cover")) {
+                getCoverImg(message.info["cover"]).then((b) => {
+                    tem.epub.addCoverImg(b);
+                })
+            }
+        }
         tem.se = message.set;
         if (comparetorunlist(tem)) {
             sendResponse(0);//重复文件
@@ -182,7 +195,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         tem.c = c;//总章数
         tem.n = 0;//已完成章数
         tem.s = 0;//是否停止
-        tem.o = [getbookinfo(message.info)];
+        if (tem.l == 0) tem.o = [getbookinfo(message.info)];
         tem.se = message.set;
         if (comparetorunlist(tem)) {
             sendResponse(0);
@@ -202,9 +215,18 @@ function run(inp, i, j) {
             chrome.windows.create({ state: chrome.windows.WindowState.MINIMIZED }, function (window) { wid = window.id; isc = 0; run(inp, i, j); });//创建窗口
         }
     }
-    if (inp.s) return;//直接退出
+    if (inp.s) {
+        if (inp.l == 0) savetxt(inp);
+        else if (inp.l == 1) saveepub(inp);
+        return;
+    }
     if (j >= inp.ml[i].l.length) {
         j = 0; i++;
+    }
+    if (j == 0) {
+        /**@type {EPUB}*/
+        let e = inp.epub;
+        inp.child = e.appendXHtmlNode(i, j, inp.ml[i]);
     }
     if (i < inp.ml.length && wid != 0) {
         if (!inp.se.snbuy && ((inp.z == 0 && inp.ml[i].l[j].buy == 0 && inp.ml[i].vip == 1) || (inp.z == 1 && inp.ml[i].l[j].buy != undefined && inp.ml[i].l[j].buy == 0)))//不保存未购买章节
@@ -241,7 +263,13 @@ function run(inp, i, j) {
                                     for (var i = 0; i < data.c.length; i++)s += ("\n" + data.c[i]);
                                     return s;
                                 }
-                                inp.o[inp.n + 1] = gets(data, i, inp);
+                                if (inp.l == 0) inp.o[inp.n + 1] = gets(data, i, inp);
+                                else if (inp.l == 1) {
+                                    if(inp.se.tnbuy && ((inp.z == 0 && data.g.chapter.isBuy == 0 && data.g.chapter.vipStatus == 1) || (inp.z == 1 && data.cl == 1 && data.buy == 0))) data.notbuy = 1;
+                                    /**@type {EPUB}*/
+                                    let e = inp.epub;
+                                    e.appendXHtmlNode(i, j, data, inp.child);
+                                }
                                 inp.n++;
                                 setTimeout(function () { run(inp, i, j + 1) }, 0);
                                 chrome.tabs.remove(tid);
@@ -271,33 +299,59 @@ function run(inp, i, j) {
     }
     else if (i == inp.ml.length)//工作完成
     {
-        chrome.tabs.create({ url: "save.html" }, function (tabs) {
-            function b(tid)//加载完毕后
-            {
-                var o = "";
-                while (inp.o.length > 0) {
-                    if (o == "") o = inp.o.pop();
-                    else o = (inp.o.pop() + "\n\n" + o);
-                }
-                chrome.runtime.sendMessage({ action: 'savetxt', b: o, name: inp.bn }, function (data) { console.log(data); });
-            }
-            function a(tid)//等待加载完毕
-            {
-                chrome.tabs.get(tid, function (tabs) {
-                    if (tabs.status == "loading") {
-                        a(tabs.id);
-                    }
-                    else b(tabs.id);
-                });
-            }
-            if (tabs.status == "loading") a(tabs.id); else b(tabs.id);
-        });
+        if (inp.l == 0) savetxt(inp);
+        else if (inp.l == 1) saveepub(inp);
         return;
     }
     if (wid == 0 && (!isc)) {
         isc = 1;
         chrome.windows.create({ state: chrome.windows.WindowState.MINIMIZED }, function (window) { wid = window.id; isc = 0;; run(inp, i, j); });//创建窗口
     }
+}
+function savetxt(inp) {
+    chrome.tabs.create({ url: "save.html" }, function (tabs) {
+        function b(tid)//加载完毕后
+        {
+            var o = "";
+            while (inp.o.length > 0) {
+                if (o == "") o = inp.o.pop();
+                else o = (inp.o.pop() + "\n\n" + o);
+            }
+            chrome.runtime.sendMessage({ action: 'savetxt', b: o, name: inp.bn }, function (data) { console.log(data); });
+        }
+        function a(tid)//等待加载完毕
+        {
+            chrome.tabs.get(tid, function (tabs) {
+                if (tabs.status == "loading") {
+                    a(tabs.id);
+                }
+                else b(tabs.id);
+            });
+        }
+        if (tabs.status == "loading") a(tabs.id); else b(tabs.id);
+    });
+}
+function saveepub(inp) {
+    chrome.tabs.create({ url: "save.html" }, function (tabs) {
+        function b(tid)//加载完毕后
+        {
+            /**@type {EPUB}*/
+            let e = inp.epub;
+            e.generate().then((b) => {
+                chrome.runtime.sendMessage({ action: 'saveepub', b: b, name: inp.bn }, function (data) { console.log(data); });
+            })
+        }
+        function a(tid)//等待加载完毕
+        {
+            chrome.tabs.get(tid, function (tabs) {
+                if (tabs.status == "loading") {
+                    a(tabs.id);
+                }
+                else b(tabs.id);
+            });
+        }
+        if (tabs.status == "loading") a(tabs.id); else b(tabs.id);
+    });
 }
 function c() {
     function remove(i) {
@@ -314,3 +368,19 @@ function c() {
     setTimeout(c, 2000);
 }
 c();
+/**
+ * 发送GET请求
+ * @param {string} url 地址
+ */
+ function getCoverImg(url) {
+    var xhr = new XMLHttpRequest();
+    var uri = new URL(url, window.location.href);
+    xhr.open("GET", uri.href);
+    xhr.responseType = "blob";
+    return new Promise((r) => {
+        xhr.onload = () => {
+            r(xhr.response)
+        }
+        xhr.send()
+    })
+}

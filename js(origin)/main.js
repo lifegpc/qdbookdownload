@@ -123,6 +123,25 @@ function bsaveallastxt(bf = bookinfo, i = 0, f = false) {
         }
     });
 }
+/**起点保存一本书（书页）
+ * @param bf 书籍信息
+ * @param {number} i 输出信息位置（用于批量下载
+ * @param {boolean} f 输出时弹出窗口（用于批量下载
+*/
+function bsaveallasepub(bf = bookinfo, i = 0, f = false) {
+    chrome.runtime.sendMessage({ action: "savewholebook", info: bf, set: getsaset() , epub: true }, function (data) {
+        console.log(data);
+        var s = '任务列表已有重复任务，添加失败。如需添加，请先停止已有重复任务。';
+        if (data) s = '已加入任务列表。（注意请不要关闭插件打开的浏览器窗口）';
+        if (d == 5) {
+            document.getElementById('o' + i).innerText = s;
+            if (f) alert('您选择的小说已尝试加入列表，详细情况请查看各本书下面的信息。');
+        }
+        else {
+            alert(s);
+        }
+    });
+}
 function zhsaveallastxt() {
     d = 3;
     if (bookinfo == undefined) getzhbookinfo();
@@ -275,6 +294,7 @@ function getbooktagstr(tag, color) {
     return s;
 }
 function getatagstr(atag) {
+    let s = "";
     if (atag.length > 0) s = atag[0]; else s = "";
     for (var i = 1; i < atag.length; i++)s += ("、" + atag[i]);
     return s;
@@ -403,6 +423,9 @@ function printbookinfo(data) {
     document.getElementById('buys').innerText = getabuy(list);
     document.getElementById('fj').innerText = getfjinfo(data.ml, list);
     document.getElementById('bsaveallastxt').addEventListener('click', function () { bsaveallastxt() });
+    document.getElementById('bsaveallasepub').addEventListener('click', () => {
+        bsaveallasepub();
+    })
 }
 function getzhbooktag(tag, str) {
     var s = "";

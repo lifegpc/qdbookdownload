@@ -1,17 +1,28 @@
 console.log('save.log')
 var b;
-chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
-{
-    if(message.action=="savetxt"&&b==undefined)
-    {
-        b=new Blob([message.b], {type: 'text/plain'});
-        saveAs(b,message.name+".txt");
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    if (message.action == "savetxt" && b == undefined) {
+        b = new Blob([message.b], { type: 'text/plain' });
+        saveAs(b, message.name + ".txt");
         sendResponse(1);
         var blobUrl = URL.createObjectURL(b);
         var link = document.createElement("a");
         link.href = blobUrl;
-        link.download = message.name+".txt";
+        link.download = message.name + ".txt";
         link.innerHTML = "点击这里也可以保存";
-        document.body.appendChild(link); 
+        document.body.appendChild(link);
+    } else if (message["action"] == "saveepub" && b == undefined) {
+        let list = Object.getOwnPropertyNames(message.b);
+        var b = new Uint8Array(list.length);
+        list.forEach((v) => {b[v] = message.b[v]})
+        b = new Blob([b], { type: 'application/zip' });
+        saveAs(b, message["name"] + ".epub")
+        sendResponse(1);
+        var blobUrl = URL.createObjectURL(b);
+        var link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = message['name'] + ".epub";
+        link.innerHTML = "点击这里也可以保存";
+        document.body.appendChild(link);
     }
 });

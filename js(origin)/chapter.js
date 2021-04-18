@@ -13,8 +13,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)//�
         for (var i = 0; i < ci.length; i++) {
             if (ci.item(i).innerHTML.indexOf('g_data') > -1) {
                 var gd = ci.item(i).innerHTML;
-                eval(gd)
-                info.g = g_data;//获取全局信息
+                info.g = eval("(function(){" + gd + ";return g_data;})()");
+                var g_data = info.g;
                 break;
             }
         }

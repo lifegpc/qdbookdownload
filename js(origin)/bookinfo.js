@@ -19,8 +19,7 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
         {
             if(ci[i].innerHTML.indexOf('g_data')>-1)
             {
-                eval(ci[i].innerHTML);
-                info.g_data=g_data;//全局数据
+                info.g_data = eval("(function(){" + ci[i].innerHTML + ";return g_data;})()"); // 全局数据
                 break;
             }
         }
@@ -111,6 +110,10 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
             }
         }
         info.ml=ml;//目录
+        let img = document.getElementById('bookImg');
+        if (img != null) {
+            info.cover = img.children[0].src;
+        }
         sendResponse(info);
     }
 });
