@@ -238,6 +238,10 @@ function run(inp, i, j) {
         }
         try {
             chrome.tabs.create({ windowId: wid, url: inp.ml[i].l[j].h, active: false }, function (tabs) {
+                if (tabs == undefined) {
+                    errorcl();
+                    return;
+                }
                 function b(tid)//加载完毕后
                 {
                     try {
