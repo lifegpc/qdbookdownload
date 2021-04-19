@@ -877,7 +877,7 @@ class EPUB {
         let p = new DOMParser();
         this.doc = p.parseFromString('<?xml version="1.0" encoding="UTF-8" standalone="no"?><package xmlns="' + opf + '" xmlns:dc="' + dc + '" unique-identifier="mainIdentifier" version="3.0" xml:lang="zh-cn" />', 'application/xml')
     }
-    /**@returns {Promise<Uint8Array>}*/
+    /**@returns {Promise<Blob>}*/
     generate() {
         let zip = new JSZip();
         zip.file("mimetype", new Blob(["application/epub+zip"], { "type": "text/plain; charset: UTF-8" }))
@@ -887,7 +887,7 @@ class EPUB {
         zip.file("item/navigation-documents.xhtml", new Blob([this.generateNav()], { "type": "application/xhtml+xml; charset: UTF-8" }))
         this.files.addToJSZip(zip)
         this.root.addToJSZip(zip)
-        return zip.generateAsync({ type: "uint8array", compression: "DEFLATE" })
+        return zip.generateAsync({ type: "blob", compression: "DEFLATE" })
     }
     generateNav() {
         return this.root.generateNav();

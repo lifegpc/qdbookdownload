@@ -23,7 +23,7 @@
     "permissions":["https://*.qidian.com/*","http://*.qidian.com/*","https://*.qdmm.com/*","http://*.qdmm.com/*","http://*.zongheng.com/*","https://*.zongheng.com/*","tabs","activeTab","storage"],
     "background":
     {
-        "scripts":["ojs/jszip.min.js", "js/epub.js", "js/background.js"]
+        "scripts":["ojs/jszip.min.js", "js/indexeddb.js", "js/epub.js", "js/background.js"]
     },
     "content_scripts":
     [{

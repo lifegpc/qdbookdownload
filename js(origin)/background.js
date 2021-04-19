@@ -1,4 +1,5 @@
 console.log('background.js');
+clearTempfileDb();
 (function () {//检查chrome.stroage.sync
     function getv(version)//获取版本数组
     {
@@ -223,7 +224,7 @@ function run(inp, i, j) {
     if (j >= inp.ml[i].l.length) {
         j = 0; i++;
     }
-    if (j == 0 && i < inp.ml.length) {
+    if (j == 0 && i < inp.ml.length && inp.l == 1) {
         /**@type {EPUB}*/
         let e = inp.epub;
         inp.child = e.appendXHtmlNode(i, j, inp.ml[i]);
@@ -265,7 +266,7 @@ function run(inp, i, j) {
                                 }
                                 if (inp.l == 0) inp.o[inp.n + 1] = gets(data, i, inp);
                                 else if (inp.l == 1) {
-                                    if(inp.se.tnbuy && ((inp.z == 0 && data.g.chapter.isBuy == 0 && data.g.chapter.vipStatus == 1) || (inp.z == 1 && data.cl == 1 && data.buy == 0))) data.notbuy = 1;
+                                    if (inp.se.tnbuy && ((inp.z == 0 && data.g.chapter.isBuy == 0 && data.g.chapter.vipStatus == 1) || (inp.z == 1 && data.cl == 1 && data.buy == 0))) data.notbuy = 1;
                                     /**@type {EPUB}*/
                                     let e = inp.epub;
                                     e.appendXHtmlNode(i, j, data, inp.child);
@@ -317,7 +318,7 @@ function savetxt(inp) {
                 if (o == "") o = inp.o.pop();
                 else o = (inp.o.pop() + "\n\n" + o);
             }
-            chrome.runtime.sendMessage({ action: 'savetxt', b: o, name: inp.bn }, function (data) { console.log(data); });
+            sendFile(inp.bn + "," + new Date().toISOString(), new Blob([inp.bn], { "type": "text/plain; charset: UTF-8" }), inp.bn + ".txt").then((data) => { console.log(data); })
         }
         function a(tid)//等待加载完毕
         {
@@ -338,7 +339,7 @@ function saveepub(inp) {
             /**@type {EPUB}*/
             let e = inp.epub;
             e.generate().then((b) => {
-                chrome.runtime.sendMessage({ action: 'saveepub', b: b, name: inp.bn }, function (data) { console.log(data); });
+                sendFile(inp.bn + "," + new Date().toISOString(), b, inp.bn + ".epub").then((data) => { console.log(data); })
             })
         }
         function a(tid)//等待加载完毕
@@ -372,7 +373,7 @@ c();
  * 发送GET请求
  * @param {string} url 地址
  */
- function getCoverImg(url) {
+function getCoverImg(url) {
     var xhr = new XMLHttpRequest();
     var uri = new URL(url, window.location.href);
     xhr.open("GET", uri.href);
