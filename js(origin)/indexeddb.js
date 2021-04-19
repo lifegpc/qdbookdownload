@@ -44,8 +44,8 @@ function reciveFile(id) {
     if (db == null) {
         return new Promise((o, j) => {
             setTimeout(() => {
-                reciveFile(id).then((d) => { o(d) }).catch((d) => { j(d) }, 100);
-            })
+                reciveFile(id).then((d) => { o(d) }).catch((d) => { j(d) });
+            }, 100);
         })
     }
     let tr = db.transaction("file", "readwrite");
