@@ -80,12 +80,16 @@ chrome.runtime.onMessage.addListener(function(message, sender,sendResponse)
                 var mlt={};
                 if(cq.style.display!='none'&&cq2==null)
                 {
-                    var temp=ci.children[i].children[1].innerText;
+                    /**@type {string} */
+                    let temp=ci.children[i].children[1].innerText;
                     var te=1;
                     if(ci.children[i].children[1].children[0].constructor.name=='HTMLAnchorElement')
                     {
-                        temp=temp.split('\n')[1];
                         te=2;
+                    }
+                    if (temp.indexOf('\n') > -1) {
+                        let ll = temp.split('\n');
+                        temp = ll[ll.length - 1];
                     }
                     mlt.t=temp.split('·')[0];//卷名
                     mlt.tc=temp.split('·')[1].split('共')[1].split('章')[0]-1+1;//总章数
