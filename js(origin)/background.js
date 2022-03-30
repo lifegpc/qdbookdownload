@@ -74,6 +74,10 @@ clearTempfileDb();
                 tem.tnbuy = true;
                 need = true;
             }
+            if (isa(data.strip, 'Boolean')) {
+                tem.strip = false;
+                need = true;
+            }
             if (need) {
                 chrome.storage.sync.set(tem);
             }

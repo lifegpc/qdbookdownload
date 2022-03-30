@@ -95,6 +95,9 @@ function saveallastxt() {
     d = 1;
     getbookinfo(chapterinfo.g.bookInfo.bookId);
 }
+function saveasxhtml(data) {
+    saveAs(new Blob([getxhtml(data)], { type: 'application/xhtml+xml' }), chapterinfo.g.bookInfo.bookName + "-" + chapterinfo.n + ".xhtml");
+}
 /**获取save的设置*/
 function getsaset() {
     var tem = {};
@@ -199,13 +202,49 @@ function zhbsaveallastxt() {
         });
     }
 }
+/**
+ * 计算字数
+ * @param {Array<string>} data 文字
+ * @returns {number} 字数
+ */
+function calwords(data) {
+    let t = 0;
+    data.forEach((v) => {
+        t += v.length;
+    })
+    return t;
+}
+/**
+ * 获取XHTML
+ * @param {{"n": string, "u": string, "w": number, "c": Array<string>, "g": object}} data
+ */
+function getxhtml(data) {
+    let dom = new DOMParser().parseFromString('<?xml version=\'1.0\' encoding=\'utf-8\'?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-Hans-CN"><head/><body/></html>', 'application/xhtml+xml');
+    let head = dom.getElementsByTagName('head')[0];
+    let body = dom.getElementsByTagName('body')[0];
+    let title = dom.createElement('title');
+    title.innerText = data.n;
+    head.appendChild(title);
+    let h1 = dom.createElement('h1');
+    h1.innerText = data.n;
+    body.appendChild(h1);
+    data.c.forEach((c) => {
+        let p = dom.createElement('p');
+        if (setting.strip) {
+            c = c.trimStart();
+        }
+        p.innerText = c;
+        body.appendChild(p);
+    })
+    return new XMLSerializer().serializeToString(dom);
+}
 /**用于处理起点主站和女生站上的批量下载*/
 function getallbook() {
 
 }
 function printinfo(data) {
     document.getElementById('title').innerText = data.n;
-    document.getElementById('length').innerText = data.w;
+    document.getElementById('length').innerText = data.w + "(" + calwords(data.c) + ")";
     document.getElementById('updatetime').innerText = data.u;
     document.getElementById('textpre').innerText = data.c[0];
     document.getElementById('chapterid').innerText = data.g.chapter.id;
@@ -238,6 +277,7 @@ function printinfo(data) {
     addchilpboard();
     document.getElementById('saveastxt').addEventListener('click', saveastxt);
     document.getElementById('saveallastxt').addEventListener('click', saveallastxt);
+    document.getElementById('saveasxhtml').addEventListener('click', () => {saveasxhtml(data)});
 }
 function addchilpboard() {
     clipboard = new ClipboardJS(".copytextb");

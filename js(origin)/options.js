@@ -14,6 +14,7 @@ chrome.storage.sync.get(function(data)
     s('autosave',data.autosave);
     s('snbuy',data.snbuy);
     s('tnbuy',data.tnbuy);
+    s('strip', data.strip);
 });
 }
 function c()//重置选项
@@ -21,6 +22,7 @@ function c()//重置选项
     s('autosave',false);
     s('snbuy',false);
     s('tnbuy',true);
+    s('strip', false);
 }
 function b()
 {
@@ -30,6 +32,7 @@ function b()
     tem.autosave=g('autosave');
     tem.snbuy=g('snbuy');
     tem.tnbuy=g('tnbuy');
+    tem.strip = g('strip');
     tem.version=mx.version;
     chrome.storage.sync.set(tem,function()
     {
